@@ -56,12 +56,13 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 		    return get.getResponseBodyAsString();
 		} catch (Exception e) {			
 			e.printStackTrace();
+			return e.getMessage();
 		} finally{
 			if (null != get){
 				get.releaseConnection();
 			}	
 		}
-		return "Exception";
+//		return "Exception";
 	}
 
 
