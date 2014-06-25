@@ -184,6 +184,7 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 					seg.setArrairport(arrPort);
 					seg.setFlightno(flightNo);
 					seg.setDepDate(param.getDepDate());
+					seg.setArrDate(param.getDepDate());
 					segs.add(seg);
 					
 					flight.setDetail(flightDetail);
@@ -214,6 +215,7 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 						seg.setArrairport(arrPort);
 						seg.setFlightno(flightNo);
 						seg.setDepDate(param.getDepDate());
+						seg.setArrDate(param.getDepDate()); 
 						flightDetail.getFlightno().add(flightNo);
 						segs.add(seg);
 	        		}
