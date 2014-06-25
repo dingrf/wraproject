@@ -159,8 +159,8 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 		        	String airWeb = ma.group(9);
 		        	String airSaver = ma.group(11);
 		        	String airFlex = ma.group(13);
-//		        	deptPort = InfoCenter.getCityCodeFromCity(deptPort);
-//		        	arrPort = InfoCenter.getCityCodeFromCity(arrPort);
+		        	deptPort = InfoCenter.getCityCodeFromCity(deptPort);
+		        	arrPort = InfoCenter.getCityCodeFromCity(arrPort);
 					List<String> flightNoList = new ArrayList<String>();
 					flightNoList.add(flightNo);
 					flightDetail.setWrapperid("gjdairtl001");
@@ -206,8 +206,8 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 	        			String arrPort = ma.group(5);
 			        	String arrTime = ma.group(6);
 			        	String flightNo = ma.group(7);
-//			        	deptPort = InfoCenter.getCityCodeFromCity(deptPort);
-//			        	arrPort = InfoCenter.getCityCodeFromCity(arrPort);
+			        	deptPort = InfoCenter.getCityCodeFromCity(deptPort);
+			        	arrPort = InfoCenter.getCityCodeFromCity(arrPort);
 						FlightSegement seg = new FlightSegement();
 						seg.setDeptime(deptTime);
 						seg.setDepairport(deptPort);
