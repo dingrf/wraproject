@@ -11,26 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.security.KeyManagementException;  
-import java.security.KeyStore;  
-import java.security.NoSuchAlgorithmException;  
-import java.security.cert.CertificateException;  
-import java.security.cert.X509Certificate; 
 
-import javax.net.ssl.SSLContext;  
-import javax.net.ssl.TrustManager;  
-import javax.net.ssl.X509TrustManager; 
-
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 import com.qunar.qfwrapper.bean.booking.BookingInfo;
 import com.qunar.qfwrapper.bean.booking.BookingResult;
@@ -49,7 +31,6 @@ import com.travelco.rdf.infocenter.InfoCenter;
 public class Wrapper_gjdairtl001 implements QunarCrawler {
 
 	public static void main(String[] args) {
-//		String str = InfoCenter.getCityCodeFromCity("broome");
 		FlightSearchParam searchParam = new FlightSearchParam();
 		searchParam.setDep("BME");
 		searchParam.setArr("KNX"); // PHE
@@ -59,7 +40,7 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 		Wrapper_gjdairtl001 wrap = new Wrapper_gjdairtl001();
 		String html = wrap.getHtml(searchParam);
 		wrap.saveLog2Txt(html);
-		ProcessResultInfo resultInfo = wrap.process(html, searchParam);
+//		ProcessResultInfo resultInfo = wrap.process(html, searchParam);
 	}
 	
 	@Override
@@ -69,28 +50,6 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 			QFHttpClient httpClient = new QFHttpClient(param, false);
 //			httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
-			
-////	        HttpClient httpClient = new DefaultHttpClient(); //创建默认的httpClient实例    
-//	        X509TrustManager xtm = new X509TrustManager(){   //创建TrustManager    
-//	            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}    
-//	            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}    
-//	            public X509Certificate[] getAcceptedIssuers() {   
-//	                return null;   //return new java.security.cert.X509Certificate[0];    
-//	            }  
-//	        };    
-//            //TLS1.0与SSL3.0基本上没有太大的差别，可粗略理解为TLS是SSL的继承者，但它们使用的是相同的SSLContext    
-//            SSLContext ctx = SSLContext.getInstance("TLS");    
-//                
-//            //使用TrustManager来初始化该上下文，TrustManager只是被SSL的Socket所使用    
-//            ctx.init(null, new TrustManager[]{xtm}, null);   
-//                
-//            //创建SSLSocketFactory    
-//            SSLSocketFactory socketFactory = new SSLSocketFactory(ctx);    
-//                
-//            //通过SchemeRegistry将SSLSocketFactory注册到我们的HttpClient上
-//            ((ClientConnectionManager)httpClient.getHttpConnectionManager()).getSchemeRegistry().register(new Scheme("https", 443, socketFactory));
-////            httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, socketFactory));			
-//			
 			String dateStr = getDataStr(param.getDepDate());
 			String getUrl =  String.format("https://secure.airnorth.com.au/AirnorthIBE/availprocessing.aspx?triptype=o&port.0=%s&port.1=%s&date.0=%s&date.1=%s&pax.0=1&pax.1=0&pax.2=0&", param.getDep(), param.getArr(), dateStr, dateStr);
 			get = new QFGetMethod(getUrl);
@@ -143,7 +102,13 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 		        Pattern p = null;  
 		        Matcher ma = null;			
 		        String regex = null;
-	        	regex = "<td class=\"Date\">(.*)<br />(.*)</td><td class=\"PortName\">(.*)<br />(.*)</td><td class=\"PortName\">(.*)<br />(.*)</td><td class=\"FlightNumber\">(.*)</td><td class=\"Fare fare-family-1\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-2\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-3\" rowspan=\"([0-9])\">(.*)</td>";  
+		        boolean hasAirSale = false;
+		        if (trString.contains("fare-family-0")){
+		        	regex = "<td class=\"Date\">(.*)<br />(.*)</td><td class=\"PortName\">(.*)<br />(.*)</td><td class=\"PortName\">(.*)<br />(.*)</td><td class=\"FlightNumber\">(.*)</td><td class=\"Fare fare-family-0\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-1\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-2\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-3\" rowspan=\"([0-9])\">(.*)</td>";  
+		        	hasAirSale = true;
+		        }
+		        else
+		        	regex = "<td class=\"Date\">(.*)<br />(.*)</td><td class=\"PortName\">(.*)<br />(.*)</td><td class=\"PortName\">(.*)<br />(.*)</td><td class=\"FlightNumber\">(.*)</td><td class=\"Fare fare-family-1\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-2\" rowspan=\"([0-9])\">(.*)</td><td class=\"Fare fare-family-3\" rowspan=\"([0-9])\">(.*)</td>";  
 	        	p = Pattern.compile(regex);  
 	        	ma = p.matcher(trString);
 	        	if (ma.find()){
@@ -151,14 +116,19 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 					flightDetail = new FlightDetail();
 	        		segs = new ArrayList<FlightSegement>();
 	        		
+	        		String deptDate = ma.group(2);
         			String deptPort = ma.group(3);
 		        	String deptTime = ma.group(4);
         			String arrPort = ma.group(5);
 		        	String arrTime = ma.group(6);
 		        	String flightNo = ma.group(7);
-		        	String airWeb = ma.group(9);
-		        	String airSaver = ma.group(11);
-		        	String airFlex = ma.group(13);
+		        	String airLv1 = ma.group(9);
+		        	String airLv2 = ma.group(11);
+		        	String airLv3 = ma.group(13);
+		        	String airLv4 = "";
+		        	if (hasAirSale)
+		        		airLv4 = ma.group(15);
+		        	deptDate = getFlightDate(deptDate);
 		        	deptPort = InfoCenter.getCityCodeFromCity(deptPort);
 		        	arrPort = InfoCenter.getCityCodeFromCity(arrPort);
 					List<String> flightNoList = new ArrayList<String>();
@@ -168,7 +138,7 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 					flightDetail.setDepcity(param.getDep());
 					flightDetail.setDepdate(date);
 					flightDetail.setFlightno(flightNoList);
-					String[] priceInfo = getPriceInfo(airWeb, airSaver, airFlex);
+					String[] priceInfo = getPriceInfo(airLv1, airLv2, airLv3, airLv4);
 					if (priceInfo == null){
 						segs = null;
 						continue;
@@ -183,8 +153,8 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 					seg.setArrtime(arrTime);
 					seg.setArrairport(arrPort);
 					seg.setFlightno(flightNo);
-					seg.setDepDate(param.getDepDate());
-					seg.setArrDate(param.getDepDate());
+					seg.setDepDate(deptDate);
+					seg.setArrDate(deptDate);
 					segs.add(seg);
 					
 					flight.setDetail(flightDetail);
@@ -201,11 +171,13 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 	        		if (ma.find()){
 	        			if (segs == null)
 	        				continue;
+	        			String deptDate = ma.group(2);
 	        			String deptPort = ma.group(3);
 			        	String deptTime = ma.group(4);
 	        			String arrPort = ma.group(5);
 			        	String arrTime = ma.group(6);
 			        	String flightNo = ma.group(7);
+			        	deptDate = getFlightDate(deptDate);
 			        	deptPort = InfoCenter.getCityCodeFromCity(deptPort);
 			        	arrPort = InfoCenter.getCityCodeFromCity(arrPort);
 						FlightSegement seg = new FlightSegement();
@@ -214,8 +186,8 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 						seg.setArrtime(arrTime);
 						seg.setArrairport(arrPort);
 						seg.setFlightno(flightNo);
-						seg.setDepDate(param.getDepDate());
-						seg.setArrDate(param.getDepDate()); 
+						seg.setDepDate(deptDate);
+						seg.setArrDate(deptDate); 
 						flightDetail.getFlightno().add(flightNo);
 						segs.add(seg);
 	        		}
@@ -237,7 +209,6 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 			return result;
 		}
 	}
-
 
 	@Override
 	public BookingResult getBookingInfo(FlightSearchParam param) {
@@ -263,9 +234,11 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 		return bookingResult;
 	}
 
-	private String[] getPriceInfo(String airWeb, String airSaver, String airFlex) {
+	private String[] getPriceInfo(String airSale, String airWeb, String airSaver, String airFlex) {
 		String airPriceInfo = null;
-		if (airWeb.startsWith("<input"))
+		if (airSale.startsWith("<input"))
+			airPriceInfo = airSale;
+		else if (airWeb.startsWith("<input"))
 			airPriceInfo = airWeb;
 		else if (airSaver.startsWith("<input"))
 			airPriceInfo = airSaver;
@@ -287,9 +260,46 @@ public class Wrapper_gjdairtl001 implements QunarCrawler {
 			return priceInfo;
 		}
 		return null;
-}
+	}
 	
-	
+
+	/**
+	 * @param dateStr    13 SEP 2004
+	 * @return
+	 */
+	private String getFlightDate(String dateStr) {
+		String[] dataStrs = dateStr.split(" ");
+		String day = dataStrs[0];
+		String month = dataStrs[1];
+		if (month.toUpperCase().equals("JAN"))
+			month = "01";
+		else if (month.toUpperCase().equals("FEB"))
+			month = "02";
+		else if (month.toUpperCase().equals("MAR"))
+			month = "03";
+		else if (month.toUpperCase().equals("APR"))
+			month = "04";
+		else if (month.toUpperCase().equals("MAY"))
+			month = "05";
+		else if (month.toUpperCase().equals("JUN"))
+			month = "06";
+		else if (month.toUpperCase().equals("JUL"))
+			month = "07";
+		else if (month.toUpperCase().equals("AUG"))
+			month = "08";
+		else if (month.toUpperCase().equals("SEP"))
+			month = "09";
+		else if (month.toUpperCase().equals("OCT"))
+			month = "10";
+		else if (month.toUpperCase().equals("NOV"))
+			month = "11";
+		else if (month.toUpperCase().equals("DEC"))
+			month = "12";
+		String year = dataStrs[2];
+		String formatDate = year +  '-' + month + "-" + day;
+		return formatDate;
+	}
+
 	private String getDataStr(String depDate) {
 		String[] dataStrs = depDate.split("-");
 		Integer month = Integer.valueOf(dataStrs[1]); 
