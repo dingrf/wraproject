@@ -142,7 +142,8 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 
 	@Override
 	public BookingResult getBookingInfo(FlightSearchParam param) {
-		String dateStr = getDataStr(param.getDepDate());
+		String depDateStr = getDataStr(param.getDepDate());
+		String retDateStr = getDataStr(param.getRetDate());
 		String bookingUrlPre = "https://secure.airnorth.com.au/AirnorthIBE/availprocessing.aspx";
 		BookingResult bookingResult = new BookingResult();
 		
@@ -153,8 +154,8 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 		map.put("triptype", "r");
 		map.put("port.0", param.getDep());
 		map.put("port.1", param.getArr());
-		map.put("date.0", dateStr);
-		map.put("date.1", dateStr);
+		map.put("date.0", depDateStr);
+		map.put("date.1", retDateStr);
 		map.put("pax.0", "1");
 		map.put("pax.1", "0");
 		map.put("pax.2", "0");
