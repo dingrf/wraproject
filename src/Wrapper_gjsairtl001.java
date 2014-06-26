@@ -44,7 +44,7 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 		Wrapper_gjsairtl001 wrap = new Wrapper_gjsairtl001();
 		String html = wrap.getHtml(searchParam);
 		wrap.saveLog2Txt(html);
-//		ProcessResultInfo resultInfo = wrap.process(html, searchParam);
+		ProcessResultInfo resultInfo = wrap.process(html, searchParam);
 	}
 	
 	@Override
@@ -176,8 +176,8 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 			return;
 		Pattern ptr = null;
 		Matcher mtr = null;
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = format.parse(param.getDepDate());
+//		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+//		Date date = format.parse(param.getDepDate());
 		
 		//找到行信息
 		String regtr = "<td class=\"Date\">(.*)</td>"; 
@@ -225,6 +225,9 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 				flightDetail.setWrapperid("gjdairtl001");
 				flightDetail.setArrcity(param.getArr());
 				flightDetail.setDepcity(param.getDep());
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+				Date date = format.parse(deptDate);
+				
 				flightDetail.setDepdate(date);
 				flightDetail.setFlightno(flightNoList);
 				String[] priceInfo = getPriceInfo(airLv1, airLv2, airLv3, airLv4);
