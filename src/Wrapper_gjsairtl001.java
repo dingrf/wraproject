@@ -36,9 +36,9 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 	public static void main(String[] args) {
 		FlightSearchParam searchParam = new FlightSearchParam();
 		searchParam.setDep("BME");
-		searchParam.setArr("PHE");
-		searchParam.setDepDate("2014-9-19");
-		searchParam.setRetDate("2014-9-23");
+		searchParam.setArr("DRW"); //PHE
+		searchParam.setDepDate("2014-8-1");
+		searchParam.setRetDate("2014-8-10");
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		Wrapper_gjsairtl001 wrap = new Wrapper_gjsairtl001();
@@ -113,11 +113,8 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 					round.setInfo(obfl.getInfo());//去程航段信息
 					round.setOutboundPrice(obfl.getDetail().getPrice());//去程价格
 					round.setReturnedPrice(rtfl.getDetail().getPrice());//返程价格
-					FlightDetail detail = new FlightDetail();
-					detail = obfl.getDetail();
+					FlightDetail detail =  cloneFlightDetail(obfl.getDetail());
 					detail.setPrice(sum(obfl.getDetail().getPrice(),rtfl.getDetail().getPrice()));//往返总价格
-					//detail.setPrice(obfl.getDetail().getPrice()+rtfl.getDetail().getPrice());//往返总价格
-					//detail.setTax(obfl.getDetail().getTax()+rtfl.getDetail().getTax());//往返总税费
 					detail.setTax(sum(obfl.getDetail().getTax(),rtfl.getDetail().getTax()));
 					round.setDetail(detail);				//将设置后的去程信息装入往返中
 					round.setRetdepdate(rtfl.getDetail().getDepdate());//返程日期
@@ -139,6 +136,23 @@ public class Wrapper_gjsairtl001 implements QunarCrawler {
 		}
 	}
 
+
+	private FlightDetail cloneFlightDetail(FlightDetail sDetail) {
+		FlightDetail detail = new FlightDetail();
+		detail.setArrcity(sDetail.getArrcity());
+		detail.setCreatetime(sDetail.getCreatetime());
+		detail.setDepcity(sDetail.getDepcity());
+		detail.setDepdate(sDetail.getDepdate());
+		detail.setFlightno(sDetail.getFlightno());
+		detail.setMonetaryunit(sDetail.getMonetaryunit());
+		detail.setPrice(sDetail.getPrice());
+		detail.setSource(sDetail.getSource());
+		detail.setStatus(sDetail.getStatus());
+		detail.setTax(sDetail.getTax());
+		detail.setUpdatetime(sDetail.getUpdatetime());
+		detail.setWrapperid(sDetail.getWrapperid());
+		return detail;
+	}
 
 	@Override
 	public BookingResult getBookingInfo(FlightSearchParam param) {
